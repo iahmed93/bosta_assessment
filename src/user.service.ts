@@ -1,9 +1,9 @@
 import { MailOptions } from "./email.service";
 import { sendEmail } from "./email.service";
-import { User } from "./user.model";
+import { IUser, UserModel } from "./user.model";
 import { generateVerificationCode, hashPassword, validateEmail } from "./utils";
 
-const signUp = async (user: User) => {
+const signUp = async (user: IUser) => {
   // validate email format
   if (!validateEmail(user.email)) {
     throw new Error("Invalid Email");
@@ -13,6 +13,8 @@ const signUp = async (user: User) => {
   // hash password
   user.password = await hashPassword(user.password, 10);
   // save user
+  const doc = new UserModel(user);
+  await doc.save();
   // send email with the verification code
   const mailOptions: MailOptions = {
     toAddress: user.email,

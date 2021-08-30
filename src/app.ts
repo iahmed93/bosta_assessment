@@ -1,14 +1,17 @@
 import express from "express";
 import { connect, ConnectOptions } from "mongoose";
 import userRouter from "./user.route";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 // rest of the code remains same
 const app = express();
-const PORT = 8000;
+const PORT = process.env.SERVER_PORT;
 
-app.use(userRouter);
+app.use("/user", userRouter);
 
-const url = "mongodb://localhost:27017/bosta";
+const url = process.env.DB_URL as string;
 const connectionOptions: ConnectOptions = {};
 connect(url, connectionOptions)
   .then(() => console.log("[server]: Connected to database"))
