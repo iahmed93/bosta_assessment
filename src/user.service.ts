@@ -5,6 +5,13 @@ import { IUser, UserModel } from "./user.model";
 import { generateVerificationCode, hashPassword, validateEmail } from "./utils";
 
 const signUp = async (user: IUser) => {
+  // Email and Password are required check
+  if (!user.password) {
+    throw new HttpError(400, "Password is required");
+  }
+  if (!user.email) {
+    throw new HttpError(400, "Email is required");
+  }
   // validate email format
   if (!validateEmail(user.email)) {
     throw new HttpError(400, "Invalid email format");
@@ -37,13 +44,31 @@ const signUp = async (user: IUser) => {
   sendEmail(mailOptions);
 };
 
-const confirmSignUp = (code: string, email: string) => {
+const confirmSignUp = async (code: string, email: string): Promise<boolean> => {
+  if (!email) {
+    throw new HttpError(400, "Email is required");
+  }
   // verify email format
+  if (!validateEmail(email)) {
+    throw new HttpError(400, "Invalid email format");
+  }
   // get user by email
+  const user = await UserModel.findOne({ email });
+  if (!user) {
+    throw new HttpError(400, "email not found");
+  }
   // check if the user is not verified, else return an error
+  if (user.isVerified) {
+    throw new HttpError(400, "email is verified");
+  }
   // validate the code, if not match return an error
+  if (user.emailVerificationCode == code) {
+    user.isVerified = true;
+    await user.save();
+    return true;
+  }
   // if code matched, update the isVerified flag
-  // return true;
+  return false;
 };
 
 const signIn = (email: string, password: string) => {
