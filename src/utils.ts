@@ -1,4 +1,5 @@
 import { hash } from "bcrypt";
+import { HttpResponse } from "./http-resp.model";
 
 export function validateEmail(email: string): boolean {
   const re =
@@ -22,4 +23,16 @@ export async function hashPassword(password: string, saltRounds: number) {
     console.error(error);
     throw new Error("Failed to hash password");
   }
+}
+
+export function generateHttpResponse(
+  code: number,
+  msg: string,
+  payload: any = null
+): HttpResponse {
+  return {
+    code,
+    msg,
+    payload,
+  };
 }

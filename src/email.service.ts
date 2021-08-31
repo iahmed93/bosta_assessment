@@ -18,6 +18,9 @@ export async function sendEmail(mailOptions: MailOptions) {
   });
   try {
     await transporter.sendMail(mailOptions);
+    console.log(
+      `Email sent successfully to "${mailOptions.to}" with subject "${mailOptions.subject}"`
+    );
   } catch (error) {
     console.error(error);
     throw new Error(`Failed to send email to "${mailOptions.to}"`);

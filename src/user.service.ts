@@ -40,7 +40,6 @@ const signUp = async (user: IUser) => {
     subject: "Verify Email",
     text: `Verification code: ${user.emailVerificationCode}`,
   };
-  console.log("[signup]", mailOptions);
   sendEmail(mailOptions);
 };
 
