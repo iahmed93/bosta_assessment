@@ -9,6 +9,7 @@ import {
   validateEmail,
 } from "../utils/utils";
 import { sign } from "jsonwebtoken";
+import { generateToken, verifyToken } from "./token.service";
 
 const signUp = async (user: IUser): Promise<void> => {
   // Email and Password are required check
@@ -95,23 +96,12 @@ const signIn = async (email: string, password: string): Promise<string> => {
   }
   // generate token
   const token = generateToken(user);
+  verifyToken(token);
   user.tokens.push(token);
   console.log(user);
   user.save();
   // return user data with the token
   return token;
 };
-
-export function generateToken(user: IUser) {
-  return sign(
-    {
-      data: JSON.stringify({
-        email: user.email,
-      }),
-    },
-    process.env.JWT_SECRET as string,
-    { expiresIn: 60 }
-  );
-}
 
 export { signUp, signIn, confirmSignUp };

@@ -8,6 +8,7 @@ interface IUser {
   isVerified: boolean;
   emailVerificationCode: string | undefined;
   tokens: string[];
+  accessToken?: string;
 }
 
 const schema = new Schema<IUser>({
