@@ -4,7 +4,7 @@ interface IUser {
   email: string;
   password: string;
   isVerified: boolean;
-  emailVerificationCode: string;
+  emailVerificationCode: string | undefined;
   tokens: string[] | undefined;
 }
 

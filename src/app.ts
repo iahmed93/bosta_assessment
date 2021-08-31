@@ -5,18 +5,20 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-// rest of the code remains same
-const app = express();
 const PORT = process.env.SERVER_PORT;
+
+const app = express();
+
+app.use(express.json());
 
 app.use("/user", userRouter);
 
 const url = process.env.DB_URL as string;
 const connectionOptions: ConnectOptions = {};
 connect(url, connectionOptions)
-  .then(() => console.log("[server]: Connected to database"))
+  .then(() => console.log("Connected to database"))
   .catch((err) => console.log(err));
 
 app.listen(PORT, () => {
-  console.log(`[server]: Server is running at https://localhost:${PORT}`);
+  console.log(`Server is running at localhost:${PORT}`);
 });
