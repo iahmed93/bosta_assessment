@@ -1,5 +1,5 @@
 import { hash } from "bcrypt";
-import { HttpResponse } from "./http-resp.model";
+import { HttpResponse } from "./models/http-resp.model";
 
 export function validateEmail(email: string): boolean {
   const re =

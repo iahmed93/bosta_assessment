@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { HttpError } from "./http-error.model";
-import { IUser } from "./user.model";
-import { confirmSignUp, signUp } from "./user.service";
-import { generateHttpResponse } from "./utils";
+import { HttpError } from "../models/http-error.model";
+import { IUser } from "../models/user.model";
+import { confirmSignUp, signUp } from "../services/user.service";
+import { generateHttpResponse } from "../utils";
 
 const userRouter = Router();
 

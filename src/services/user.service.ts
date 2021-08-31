@@ -1,8 +1,12 @@
 import { MailOptions } from "./email.service";
 import { sendEmail } from "./email.service";
-import { HttpError } from "./http-error.model";
-import { IUser, UserModel } from "./user.model";
-import { generateVerificationCode, hashPassword, validateEmail } from "./utils";
+import { HttpError } from "../models/http-error.model";
+import { IUser, UserModel } from "../models/user.model";
+import {
+  generateVerificationCode,
+  hashPassword,
+  validateEmail,
+} from "../utils";
 
 const signUp = async (user: IUser) => {
   // Email and Password are required check
