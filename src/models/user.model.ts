@@ -1,11 +1,13 @@
+import { ObjectId } from "mongodb";
 import { model, Schema } from "mongoose";
 
 interface IUser {
+  _id?: ObjectId;
   email: string;
   password: string;
   isVerified: boolean;
   emailVerificationCode: string | undefined;
-  tokens: string[] | undefined;
+  tokens: string[];
 }
 
 const schema = new Schema<IUser>({

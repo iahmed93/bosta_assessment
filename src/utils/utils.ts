@@ -1,5 +1,5 @@
-import { hash } from "bcrypt";
-import { HttpResponse } from "./models/http-resp.model";
+import { compareSync, hashSync } from "bcrypt";
+import { HttpResponse } from "../models/http-resp.model";
 
 export function validateEmail(email: string): boolean {
   const re =
@@ -16,13 +16,17 @@ export function generateVerificationCode(length: number): string {
   return code;
 }
 
-export async function hashPassword(password: string, saltRounds: number) {
+export function hashedText(password: string, saltRounds: number): string {
   try {
-    return await hash(password, saltRounds);
+    return hashSync(password, saltRounds);
   } catch (error) {
     console.error(error);
     throw new Error("Failed to hash password");
   }
+}
+
+export function compareHash(plainText: string, hashedText: string): boolean {
+  return compareSync(plainText, hashedText);
 }
 
 export function generateHttpResponse(
