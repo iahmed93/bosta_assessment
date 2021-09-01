@@ -1,11 +1,14 @@
 import { model, Schema } from "mongoose";
 
 type CheckStatus = "active" | "paused";
+type Protocol = "http" | "https" | "tcp";
 
 interface ICheck {
+  _id?: string;
+  userId: string;
   name: string;
   url: string;
-  protocol: string;
+  protocol: Protocol;
   path?: string;
   webhook?: string;
   timeout?: number; // default 5 seconds
@@ -13,11 +16,12 @@ interface ICheck {
   threshold?: number; // default 1 failure
   authentication?: { username: string; password: string };
   httpHeaders?: { [key: string]: string }[];
-  assert?: { statusCode: string };
+  assert?: { statusCode: number };
   tags?: string[];
   ignoreSSL: boolean;
   status?: CheckStatus;
   port?: number;
+  method?: string;
 }
 
 const schema = new Schema<ICheck>({
@@ -31,11 +35,13 @@ const schema = new Schema<ICheck>({
   threshold: { type: Number, default: 1 },
   authentication: { username: { type: String }, password: { type: String } },
   httpHeaders: [{ type: Object }],
-  assert: { type: String },
+  assert: { statusCode: { type: Number } },
   tags: [{ type: String }],
   ignoreSSL: { type: Boolean, default: true },
   status: { type: String, default: "active" },
   port: { type: Number },
+  method: { type: String },
+  userId: { type: String, required: true },
 });
 
 const CheckModel = model<ICheck>("Check", schema);

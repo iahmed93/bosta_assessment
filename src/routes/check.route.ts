@@ -25,6 +25,7 @@ checkRouter.put("/", async (req, res) => {
 
 function createCheckObject(req: Request): ICheck {
   const newCheck: ICheck = {
+    userId: req.body.userId,
     name: req.body.name,
     url: req.body.url,
     protocol: req.body.protocol,
@@ -33,6 +34,7 @@ function createCheckObject(req: Request): ICheck {
     interval: req.body.interval ? req.body.interval : 10, // in seconds
     threshold: req.body.threshold ? req.body.threshold : 1, // default is one failure
     status: "active",
+    method: req.body.method ? req.body.method : "get",
   };
   if (req.body.path) {
     newCheck.path = req.body.path;

@@ -34,6 +34,7 @@ export async function auth(req: Request, res: Response, next: any) {
     if (user.tokens.indexOf(token) === -1) {
       return res.status(401).json(generateHttpResponse(401, "Invalid Token"));
     }
+    req.body.userId = payload?._id;
     next();
   } catch (error) {
     console.error(error);
