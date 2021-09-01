@@ -1,12 +1,12 @@
 import { model, Schema } from "mongoose";
 
-type CheckStatus = "up" | "down";
+type UrlStatus = "up" | "down";
 
 interface ICheckResult {
   checkId: string;
   timestamp: number;
   elapsedTime: number;
-  status: CheckStatus;
+  status: UrlStatus;
   request?: any;
   response?: any;
 }
@@ -22,4 +22,4 @@ const schema = new Schema<ICheckResult>({
 
 const CheckResultModel = model<ICheckResult>("CheckResult", schema);
 
-export { CheckResultModel, ICheckResult, CheckStatus };
+export { CheckResultModel, ICheckResult, UrlStatus };

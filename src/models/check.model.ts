@@ -46,4 +46,4 @@ const schema = new Schema<ICheck>({
 
 const CheckModel = model<ICheck>("Check", schema);
 
-export { CheckModel, ICheck };
+export { CheckModel, ICheck, CheckStatus };

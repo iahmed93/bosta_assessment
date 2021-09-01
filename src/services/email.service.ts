@@ -9,7 +9,7 @@ export interface MailOptions {
 
 export async function sendEmail(mailOptions: MailOptions) {
   const transporter = createTransport({
-    host: "smtp.ethereal.email",
+    host: process.env.EMAIL_HOST,
     port: 587,
     auth: {
       user: process.env.EMAIL_USER,

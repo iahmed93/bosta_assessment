@@ -1,13 +1,23 @@
 import { MongoServerError } from "mongodb";
-import { CheckResultModel, ICheckResult } from "../models/check-result.model";
+import {
+  CheckResultModel,
+  ICheckResult,
+  UrlStatus,
+} from "../models/check-result.model";
 import { CheckModel, ICheck } from "../models/check.model";
 import { HttpError } from "../models/http-error.model";
 import axios, { AxiosRequestConfig, Method } from "axios";
 import { Agent } from "https";
-import { Socket } from "net";
-import PromiseSocket from "promise-socket";
+import { MailOptions, sendEmail } from "./email.service";
+import { UserModel } from "../models/user.model";
+
+// TODO: Create http server
+// TODO: Create TCP server
+// TODO: Test sending email if status changes
+// TODO: Test start all active check on starting the server
 
 const activeChecks: { [key: string]: any } = {};
+const lastCheckResult: { [key: string]: ICheckResult } = {};
 
 export async function addCheck(check: ICheck) {
   // check for required properties
@@ -44,6 +54,13 @@ async function checkUrl(check: ICheck) {
   }
   // save the request result
   if (result) {
+    if (
+      lastCheckResult[check.name] &&
+      lastCheckResult[check.name].status !== result.status
+    ) {
+      sendStatusEmail(check, result.status);
+    }
+    lastCheckResult[check.name] = result;
     saveCheckResult(result);
   }
 }
@@ -71,33 +88,47 @@ async function sendHttpRequest(check: ICheck): Promise<ICheckResult> {
     config.validateStatus = (status) => status == check.assert?.statusCode;
   }
   const startTime = Date.now();
+  let checkResult: ICheckResult | null = null;
   try {
-    const result = await axios(config);
-    return {
+    const response = await axios(config);
+    checkResult = {
       checkId: check._id!,
       timestamp: startTime,
       elapsedTime: Date.now() - startTime,
       status: "up",
       // request: result.request,
-      response: {
-        statusCode: result.status,
-        statusText: result.statusText,
-        headers: result.headers,
-        data: result.data,
-      },
+      // response: {
+      //   statusCode: result.status,
+      //   statusText: result.statusText,
+      //   headers: result.headers,
+      //   data: result.data,
+      // },
     };
   } catch (error: any) {
     console.error(error);
-    return {
+    checkResult = {
       checkId: check._id!,
       timestamp: startTime,
       elapsedTime: Date.now() - startTime,
       status: "down",
-      request: error.request ? error.request : null,
-      response: error.response ? error.response : error.message,
+      // request: error.request ? error.request : null,
+      // response: error.response ? error.response : error.message,
     };
   }
+  return checkResult;
 }
+
+async function sendStatusEmail(check: ICheck, status: UrlStatus) {
+  const user = await UserModel.findById(check.userId);
+  const mailOptions: MailOptions = {
+    to: user!.email,
+    from: "no-reply@test.com",
+    subject: "Check Status",
+    text: `Check "${check.name}" is ${status}`,
+  };
+  sendEmail(mailOptions);
+}
+
 async function sendTcpRequest(check: ICheck): Promise<ICheckResult> {
   // const promiseSocket = new PromiseSocket(new Socket());
   // promiseSocket.setTimeout(check.timeout!);
@@ -150,3 +181,15 @@ function checkRequiredFields(check: ICheck) {
 //   interval: 10,
 // };
 // startCheck(check);
+
+export async function startActiveChecks() {
+  try {
+    const activeChecks = await CheckModel.find({ status: "active" });
+    for (let check of activeChecks) {
+      await startCheck(check);
+    }
+    console.log(`active checks started`);
+  } catch (error) {
+    console.log(error);
+  }
+}

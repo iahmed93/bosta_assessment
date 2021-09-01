@@ -4,6 +4,7 @@ import userRouter from "./routes/user.route";
 import * as dotenv from "dotenv";
 import { auth } from "./middlewares/auth";
 import { checkRouter } from "./routes/check.route";
+import { startActiveChecks } from "./services/check.service";
 
 dotenv.config();
 
@@ -22,7 +23,11 @@ app.use("/check", checkRouter);
 const url = process.env.DB_URL as string;
 const connectionOptions: ConnectOptions = {};
 connect(url, connectionOptions)
-  .then(() => console.log("Connected to database"))
+  .then(() => {
+    console.log("Connected to database");
+    console.log(`starting all active checks`);
+    startActiveChecks();
+  })
   .catch((err) => console.log(err));
 
 app.listen(PORT, () => {
