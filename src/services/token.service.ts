@@ -1,4 +1,4 @@
-import { JwtPayload, sign, verify } from "jsonwebtoken";
+import { sign, verify } from "jsonwebtoken";
 import { IUser } from "../models/user.model";
 
 export function generateToken(user: IUser) {
@@ -10,12 +10,11 @@ export function generateToken(user: IUser) {
       }),
     },
     process.env.JWT_SECRET as string,
-    { expiresIn: 60 }
+    { expiresIn: Number.parseInt(process.env.JWT_EXPIRES_IN as string) }
   );
 }
 
 export function verifyToken(token: string): string {
-  console.log(token);
   const payload = verify(token, process.env.JWT_SECRET as string);
   return typeof payload !== "string" ? payload.data : payload;
 }

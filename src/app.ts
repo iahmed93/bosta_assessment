@@ -3,7 +3,7 @@ import { connect, ConnectOptions } from "mongoose";
 import userRouter from "./routes/user.route";
 import * as dotenv from "dotenv";
 import { auth } from "./middlewares/auth";
-import checkRouter from "./routes/check.route";
+import { checkRouter } from "./routes/check.route";
 
 dotenv.config();
 
