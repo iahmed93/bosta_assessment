@@ -40,7 +40,7 @@ async function checkUrl(check: ICheck) {
   if (check.protocol == "http" || check.protocol == "https") {
     result = await sendHttpRequest(check);
   } else if (check.protocol == "tcp") {
-    result = sendTcpRequest(check);
+    result = await sendTcpRequest(check);
   }
   // save the request result
   if (result) {
