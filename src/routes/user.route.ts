@@ -7,7 +7,6 @@ import { generateHttpResponse } from "../utils/utils";
 const userRouter = Router();
 
 userRouter.put("/signup", async (req, res) => {
-  console.log("/signup body", req.body);
   try {
     const newUser: IUser = {
       email: req.body.email,
@@ -34,7 +33,6 @@ userRouter.put("/signup", async (req, res) => {
 });
 
 userRouter.post("/signin", async (req, res) => {
-  console.log("/signin body", req.body);
   try {
     const token = await signIn(req.body.email, req.body.password);
     return res
@@ -53,17 +51,16 @@ userRouter.post("/signin", async (req, res) => {
   }
 });
 
-userRouter.post("/verify", (req, res) => {
-  console.log("/verify body", req.body);
+userRouter.post("/verify", async (req, res) => {
   try {
-    confirmSignUp(req.body.code, req.body.email);
+    await confirmSignUp(req.body.code, req.body.email);
     return res.status(200).json(generateHttpResponse(200, "Email Verified"));
   } catch (error: HttpError | any) {
     console.error("/verify ERROR", { error });
-    if (error instanceof HttpError) {
+    if (error instanceof HttpError || error.code === 400) {
       return res
         .status(error.code)
-        .json(generateHttpResponse(error.code, "error.message", error));
+        .json(generateHttpResponse(error.code, error.message, error));
     }
     return res
       .status(500)
@@ -71,4 +68,4 @@ userRouter.post("/verify", (req, res) => {
   }
 });
 
-export = userRouter;
+export { userRouter };

@@ -183,9 +183,9 @@ export async function deleteCheck(name: string) {
     } else {
       throw new HttpError(400, `Check with name ${name} is not found`);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
-    throw new HttpError(500, error);
+    throw new HttpError(500, error.message);
   }
 }
 
@@ -199,9 +199,9 @@ export async function pauseCheck(name: string) {
     } else {
       throw new HttpError(400, `Check with name ${name} is not found`);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
-    throw new HttpError(500, error);
+    throw new HttpError(500, error.message);
   }
 }
 
@@ -215,9 +215,9 @@ export async function activateCheck(name: string) {
     } else {
       throw new HttpError(400, `Check with name ${name} is not found`);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
-    throw new HttpError(500, error);
+    throw new HttpError(500, error.message);
   }
 }
 

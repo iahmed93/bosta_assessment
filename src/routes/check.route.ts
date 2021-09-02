@@ -7,7 +7,6 @@ import { generateHttpResponse } from "../utils/utils";
 const checkRouter = Router();
 
 checkRouter.put("/", async (req, res) => {
-  console.log("/check body", req.body);
   try {
     await addCheck(createCheckObject(req));
     res.json(generateHttpResponse(200, "Success"));

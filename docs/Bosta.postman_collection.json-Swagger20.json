@@ -1,0 +1,341 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "Bosta",
+    "contact": {}
+  },
+  "host": "localhost:8000",
+  "basePath": "/",
+  "securityDefinitions": {},
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/user/signup": {
+      "put": {
+        "summary": "Sign Up",
+        "tags": [
+          "Misc"
+        ],
+        "operationId": "SignUp",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "default": "Bearer {token}",
+            "type": "string"
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SignUpRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        }
+      }
+    },
+    "/api/user/verify": {
+      "post": {
+        "summary": "Verify Email",
+        "tags": [
+          "Misc"
+        ],
+        "operationId": "VerifyEmail",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "default": "Bearer {token}",
+            "type": "string"
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/VerifyEmailRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        }
+      }
+    },
+    "/api/user/signin": {
+      "post": {
+        "summary": "Sign In",
+        "tags": [
+          "Misc"
+        ],
+        "operationId": "SignIn",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "default": "Bearer {token}",
+            "type": "string"
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SignInRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        }
+      }
+    },
+    "/api/check": {
+      "put": {
+        "summary": "Add Check",
+        "tags": [
+          "Misc"
+        ],
+        "operationId": "AddCheck",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "default": "Bearer {token}",
+            "type": "string"
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/AddCheckRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        }
+      }
+    },
+    "/check": {
+      "post": {
+        "summary": "Edit Check",
+        "tags": [
+          "Misc"
+        ],
+        "operationId": "EditCheck",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "default": "Bearer {token}",
+            "type": "string"
+          },
+          {
+            "name": "Body",
+            "in": "body",
+            "required": true,
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/EditCheckRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "SignUpRequest": {
+      "title": "SignUpRequest",
+      "example": {
+        "email": "islam93ahmed@gmail.com",
+        "password": "test"
+      },
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "email",
+        "password"
+      ]
+    },
+    "VerifyEmailRequest": {
+      "title": "VerifyEmailRequest",
+      "example": {
+        "code": "3524",
+        "email": "islam93ahmed@gmail.com"
+      },
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "email"
+      ]
+    },
+    "SignInRequest": {
+      "title": "SignInRequest",
+      "example": {
+        "email": "islam93ahmed@hotmail.com",
+        "password": "test"
+      },
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "email",
+        "password"
+      ]
+    },
+    "AddCheckRequest": {
+      "title": "AddCheckRequest",
+      "example": {
+        "name": "t2",
+        "url": "localhost",
+        "port": 8080,
+        "protocol": "http",
+        "ignoreSSL": false
+      },
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "protocol": {
+          "type": "string"
+        },
+        "ignoreSSL": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "url",
+        "port",
+        "protocol",
+        "ignoreSSL"
+      ]
+    },
+    "EditCheckRequest": {
+      "title": "EditCheckRequest",
+      "example": {
+        "name": "test",
+        "url": "google.com",
+        "protocol": "https",
+        "ignoreSSL": false
+      },
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "protocol": {
+          "type": "string"
+        },
+        "ignoreSSL": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "url",
+        "protocol",
+        "ignoreSSL"
+      ]
+    }
+  },
+  "tags": [
+    {
+      "name": "Misc",
+      "description": ""
+    }
+  ]
+}

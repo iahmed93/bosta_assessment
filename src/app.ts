@@ -1,24 +1,31 @@
 import express from "express";
 import { connect, ConnectOptions } from "mongoose";
-import userRouter from "./routes/user.route";
 import * as dotenv from "dotenv";
+import morgan from "morgan";
+import swaggerJSDoc from "swagger-jsdoc";
+import swaggerUI from "swagger-ui-express";
+import fs from "fs";
+
+import { userRouter } from "./routes/user.route";
 import { auth } from "./middlewares/auth";
 import { checkRouter } from "./routes/check.route";
 import { startActiveChecks } from "./services/check.service";
 
 dotenv.config();
 
-const PORT = process.env.SERVER_PORT;
+const PORT = process.env.PORT || 8000;
+
+const swaggerData = fs.readFileSync("src/assets/swagger.json", "utf-8");
 
 const app = express();
 
+app.use("/api/docs", swaggerUI.serve, swaggerUI.setup(JSON.parse(swaggerData)));
+
 app.use(express.json());
-
-app.use("/user", userRouter);
-
+app.use(morgan("combined"));
+app.use("/api/user", userRouter);
 app.use(auth);
-
-app.use("/check", checkRouter);
+app.use("/api/check", checkRouter);
 
 const url = process.env.DB_URL as string;
 const connectionOptions: ConnectOptions = {};
