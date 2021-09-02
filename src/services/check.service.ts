@@ -4,7 +4,7 @@ import {
   ICheckResult,
   UrlStatus,
 } from "../models/check-result.model";
-import { CheckModel, ICheck } from "../models/check.model";
+import { CheckModel, CheckStatus, ICheck } from "../models/check.model";
 import { HttpError } from "../models/http-error.model";
 import axios, { AxiosRequestConfig, Method } from "axios";
 import { Agent } from "https";
@@ -13,7 +13,11 @@ import { UserModel } from "../models/user.model";
 import PromiseSocket from "promise-socket";
 import { Socket } from "net";
 
-const activeChecks: { [key: string]: any } = {};
+// TODO: Test Pause
+// TODO: Test Delete
+// TODO: Test Activate
+
+const activeChecks: { [key: string]: NodeJS.Timer } = {};
 const lastCheckResult: { [key: string]: ICheckResult } = {};
 
 export async function addCheck(check: ICheck) {
@@ -44,10 +48,17 @@ async function checkUrl(check: ICheck) {
   console.log(`[${check.name}]sending request to url ${check.url}`);
   // send the request
   let result: ICheckResult | null = null;
-  if (check.protocol == "http" || check.protocol == "https") {
-    result = await sendHttpRequest(check);
-  } else if (check.protocol == "tcp") {
-    result = await sendTcpRequest(check);
+  let triesCount = 0;
+  while (
+    (result == null || result.status! === "down") &&
+    triesCount < check.threshold!
+  ) {
+    if (check.protocol == "http" || check.protocol == "https") {
+      result = await sendHttpRequest(check);
+    } else if (check.protocol == "tcp") {
+      result = await sendTcpRequest(check);
+    }
+    triesCount++;
   }
   // save the request result
   if (result) {
@@ -164,11 +175,51 @@ async function saveCheckResult(checkResult: ICheckResult) {
   }
 }
 
-export function deleteCheck(check: ICheck) {}
+export async function deleteCheck(name: string) {
+  try {
+    const check = await CheckModel.findOne({ name });
+    if (check) {
+      await check.delete();
+    } else {
+      throw new HttpError(400, `Check with name ${name} is not found`);
+    }
+  } catch (error) {
+    console.error(error);
+    throw new HttpError(500, error);
+  }
+}
 
-export function pauseCheck(check: ICheck) {}
+export async function pauseCheck(name: string) {
+  try {
+    const check = await CheckModel.findOne({ name });
+    if (check) {
+      clearInterval(activeChecks[check.name]);
+      check.status = "pasued" as CheckStatus;
+      await check.save();
+    } else {
+      throw new HttpError(400, `Check with name ${name} is not found`);
+    }
+  } catch (error) {
+    console.error(error);
+    throw new HttpError(500, error);
+  }
+}
 
-export function activateCheck(check: ICheck) {}
+export async function activateCheck(name: string) {
+  try {
+    const check = await CheckModel.findOne({ name });
+    if (check) {
+      startCheck(check);
+      check.status = "active" as CheckStatus;
+      await check.save();
+    } else {
+      throw new HttpError(400, `Check with name ${name} is not found`);
+    }
+  } catch (error) {
+    console.error(error);
+    throw new HttpError(500, error);
+  }
+}
 
 function checkRequiredFields(check: ICheck) {
   if (!check.name) {

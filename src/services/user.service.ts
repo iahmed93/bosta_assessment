@@ -8,7 +8,6 @@ import {
   hashedText,
   validateEmail,
 } from "../utils/utils";
-import { sign } from "jsonwebtoken";
 import { generateToken, verifyToken } from "./token.service";
 
 const signUp = async (user: IUser): Promise<void> => {

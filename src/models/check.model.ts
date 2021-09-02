@@ -19,7 +19,7 @@ interface ICheck {
   assert?: { statusCode: number };
   tags?: string[];
   ignoreSSL: boolean;
-  status?: CheckStatus;
+  status: CheckStatus;
   port?: number;
   method?: string;
 }
