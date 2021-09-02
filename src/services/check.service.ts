@@ -10,11 +10,8 @@ import axios, { AxiosRequestConfig, Method } from "axios";
 import { Agent } from "https";
 import { MailOptions, sendEmail } from "./email.service";
 import { UserModel } from "../models/user.model";
-
-// TODO: Create http server
-// TODO: Create TCP server
-// TODO: Test sending email if status changes
-// TODO: Test start all active check on starting the server
+import PromiseSocket from "promise-socket";
+import { Socket } from "net";
 
 const activeChecks: { [key: string]: any } = {};
 const lastCheckResult: { [key: string]: ICheckResult } = {};
@@ -29,7 +26,7 @@ export async function addCheck(check: ICheck) {
     await doc.save();
   } catch (error) {
     if (error instanceof MongoServerError && error.code == 11000) {
-      throw new HttpError(400, `${error.keyValue.name} is in use`);
+      throw new HttpError(400, `Check with "${error.keyValue}" already exist`);
     }
     throw error;
   }
@@ -84,7 +81,11 @@ async function sendHttpRequest(check: ICheck): Promise<ICheckResult> {
   if (check.httpHeaders) {
     config.headers = check.httpHeaders;
   }
-  if (check.assert) {
+  if (
+    check.assert &&
+    check.assert.statusCode >= 200 &&
+    check.assert.statusCode < 600
+  ) {
     config.validateStatus = (status) => status == check.assert?.statusCode;
   }
   const startTime = Date.now();
@@ -130,17 +131,28 @@ async function sendStatusEmail(check: ICheck, status: UrlStatus) {
 }
 
 async function sendTcpRequest(check: ICheck): Promise<ICheckResult> {
-  // const promiseSocket = new PromiseSocket(new Socket());
-  // promiseSocket.setTimeout(check.timeout!);
-  // await promiseSocket.connect(check.port!, check.url);
-  // if (promiseSocket)
-
-  return {
-    checkId: check._id!,
-    elapsedTime: 0,
-    status: "up",
-    timestamp: 1234,
-  };
+  const promiseSocket = new PromiseSocket(new Socket());
+  promiseSocket.setTimeout(check.timeout!);
+  const startTime = Date.now();
+  try {
+    await promiseSocket.connect(check.port ? check.port : 80, check.url);
+    await promiseSocket.write("test");
+    await promiseSocket.destroy();
+    return {
+      checkId: check._id!,
+      elapsedTime: Date.now() - startTime,
+      status: "up",
+      timestamp: startTime,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      checkId: check._id!,
+      elapsedTime: Date.now() - startTime,
+      status: "down",
+      timestamp: startTime,
+    };
+  }
 }
 
 async function saveCheckResult(checkResult: ICheckResult) {
@@ -188,7 +200,11 @@ export async function startActiveChecks() {
     for (let check of activeChecks) {
       await startCheck(check);
     }
-    console.log(`active checks started`);
+    if (activeChecks.length > 0) {
+      console.log(`${activeChecks.length} active checks started`);
+    } else {
+      console.log(`No active checks found`);
+    }
   } catch (error) {
     console.log(error);
   }
