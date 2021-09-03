@@ -9,13 +9,14 @@ import { Socket } from "net";
 import { Alert } from "./alert.service";
 import { EmailAlert } from "./email-alert.service";
 import { WebhookAlert } from "./webhook-alert.service";
+import { ICheckReport } from "../models/check-report.model";
 
 // TODO: Test Alerts and Webhooks
 // TODO: Test all input of the add check
 // TODO: Test the edit
 
 const activeChecks: { [key: string]: NodeJS.Timer } = {};
-const lastCheckResult: { [key: string]: ICheckResult } = {};
+const prevCheckResult: { [key: string]: ICheckResult } = {};
 const alerts: Alert[] = [new EmailAlert(), new WebhookAlert()];
 
 export async function addCheck(check: ICheck) {
@@ -66,13 +67,14 @@ async function checkUrl(check: ICheck) {
   // save the request result
   if (result) {
     if (
-      lastCheckResult[check.name] &&
-      lastCheckResult[check.name].status !== result.status
+      prevCheckResult[check.name] &&
+      prevCheckResult[check.name].status !== result.status
     ) {
       sendStatusAlert(check, result);
     }
-    lastCheckResult[check.name] = result;
+    prevCheckResult[check.name] = result;
     saveCheckResult(result);
+    updateCheckReport(check, result);
   }
 }
 
@@ -261,3 +263,20 @@ export async function editCheck(check: ICheck) {
   await activateCheck(check.name);
 }
 
+async function updateCheckReport (check: ICheck, result: ICheckResult){
+  // get the report from the DB
+  // if not found crate new one
+  // increment the checksCount
+  // if down => increment the outages
+  // if down and prev check was down => add the interval time to the downtime
+  // if up and prev check was up => add the interval time to the uptime
+  // if up => add the result reponse time to the totalResponseTime then calculate average response time
+  // add check result to history
+}
+
+export async function getCheckReportByUserId (userId: string, tags: string[]) // : ICheckReport
+{
+  // get all checks by userId
+  // get all check reports using the list of checksIds
+  // add the name of the check to each doc of the reports
+}
