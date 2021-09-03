@@ -25,7 +25,7 @@ interface ICheck {
 }
 
 const schema = new Schema<ICheck>({
-  name: { type: String, required: true, unique: true },
+  name: { type: String, required: true},
   url: { type: String, required: true },
   protocol: { type: String, require: true },
   path: { type: String },

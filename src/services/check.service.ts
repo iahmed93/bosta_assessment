@@ -1,9 +1,5 @@
 import { MongoServerError } from "mongodb";
-import {
-  CheckResultModel,
-  ICheckResult,
-  UrlStatus,
-} from "../models/check-result.model";
+import {CheckResultModel, ICheckResult} from "../models/check-result.model";
 import { CheckModel, CheckStatus, ICheck } from "../models/check.model";
 import { HttpError } from "../models/http-error.model";
 import axios, { AxiosRequestConfig, Method } from "axios";
@@ -14,6 +10,10 @@ import { Alert } from "./alert.service";
 import { EmailAlert } from "./email-alert.service";
 import { WebhookAlert } from "./webhook-alert.service";
 
+// TODO: Test Alerts and Webhooks
+// TODO: Test all input of the add check
+// TODO: Test the edit
+
 const activeChecks: { [key: string]: NodeJS.Timer } = {};
 const lastCheckResult: { [key: string]: ICheckResult } = {};
 const alerts: Alert[] = [new EmailAlert(), new WebhookAlert()];
@@ -21,6 +21,11 @@ const alerts: Alert[] = [new EmailAlert(), new WebhookAlert()];
 export async function addCheck(check: ICheck) {
   // check for required properties
   checkRequiredFields(check);
+  // check if the name and userid found 
+  const oldCheck = await CheckModel.findOne({ name: check.name, userId: check.userId });
+  if (oldCheck){
+    throw new HttpError(400, `Check with name "${check.name}" is already exist`);
+  }
   // save check
   let doc = null;
   try {
@@ -242,6 +247,17 @@ export async function startActiveChecks() {
   }
 }
 
-export async function editCheck() {}
+export async function editCheck(check: ICheck) {
+  // get the check from the database
+  const oldCheck = await CheckModel.findOne({ name: check.name, userId: check.userId });
+  if (!oldCheck) {
+    throw new HttpError(400, `Check with name ${name} is not found`);
+  }
+  // pause the check
+  await pauseCheck(check.name);
+  // update and save the check
+  await CheckModel.findByIdAndUpdate(oldCheck._id, check);
+  // activate check back
+  await activateCheck(check.name);
+}
 
-export async function sendAllert(check: ICheck, checkResult: ICheckResult) {}

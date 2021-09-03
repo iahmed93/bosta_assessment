@@ -13,3 +13,5 @@ JWT_EXPIRES_IN=6000
 ### Swagger Docs URL
 
 - localhost:8000/api/docs
+
+### to create an ethereal account to test emails go to `https://ethereal.email/login`

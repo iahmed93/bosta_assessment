@@ -5,6 +5,7 @@ import {
   activateCheck,
   addCheck,
   deleteCheck,
+  editCheck,
   pauseCheck,
 } from "../services/check.service";
 import { generateHttpResponse } from "../utils/utils";
@@ -14,7 +15,7 @@ const checkRouter = Router();
 checkRouter.put("/", async (req, res) => {
   try {
     await addCheck(createCheckObject(req));
-    res.json(generateHttpResponse(200, "Success"));
+    res.json(generateHttpResponse(200, "Create Success"));
   } catch (error: HttpError | any) {
     if (error instanceof HttpError) {
       return res
@@ -28,7 +29,19 @@ checkRouter.put("/", async (req, res) => {
 });
 
 checkRouter.post("/", async (req, res) => {
-  res.send("Post /");
+  try {
+    await editCheck(createCheckObject(req));
+    res.json(generateHttpResponse(200, "Edit Success"));
+  } catch (error: HttpError | any) {
+    if (error instanceof HttpError) {
+      return res
+        .status(error.code)
+        .json(generateHttpResponse(error.code, error.msg));
+    }
+    return res
+      .status(500)
+      .json(generateHttpResponse(500, "Unkown Error", error));
+  }
 });
 
 checkRouter.post("/pause", async (req, res) => {
