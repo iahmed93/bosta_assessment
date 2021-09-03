@@ -1,7 +1,12 @@
 import { Request, Router } from "express";
 import { ICheck } from "../models/check.model";
 import { HttpError } from "../models/http-error.model";
-import { addCheck } from "../services/check.service";
+import {
+  activateCheck,
+  addCheck,
+  deleteCheck,
+  pauseCheck,
+} from "../services/check.service";
 import { generateHttpResponse } from "../utils/utils";
 
 const checkRouter = Router();
@@ -11,10 +16,83 @@ checkRouter.put("/", async (req, res) => {
     await addCheck(createCheckObject(req));
     res.json(generateHttpResponse(200, "Success"));
   } catch (error: HttpError | any) {
-    if (error instanceof HttpError || error.code === 400) {
+    if (error instanceof HttpError) {
       return res
         .status(error.code)
-        .json(generateHttpResponse(error.code, error.message));
+        .json(generateHttpResponse(error.code, error.msg));
+    }
+    return res
+      .status(500)
+      .json(generateHttpResponse(500, "Unkown Error", error));
+  }
+});
+
+checkRouter.post("/", async (req, res) => {
+  res.send("Post /");
+});
+
+checkRouter.post("/pause", async (req, res) => {
+  try {
+    if (!req.body.name) {
+      return res
+        .status(400)
+        .json(generateHttpResponse(400, "Check name is missing"));
+    }
+    await pauseCheck(req.body.name);
+    return res.json(
+      generateHttpResponse(200, `Check '${req.body.name}' paused`)
+    );
+  } catch (error) {
+    if (error instanceof HttpError) {
+      return res
+        .status(error.code)
+        .json(generateHttpResponse(error.code, error.msg));
+    }
+    return res
+      .status(500)
+      .json(generateHttpResponse(500, "Unkown Error", error));
+  }
+});
+
+checkRouter.post("/activate", async (req, res) => {
+  try {
+    if (!req.body.name) {
+      return res
+        .status(400)
+        .json(generateHttpResponse(400, "Check name is missing"));
+    }
+    await activateCheck(req.body.name);
+    return res.json(
+      generateHttpResponse(200, `Check '${req.body.name}' activated`)
+    );
+  } catch (error) {
+    if (error instanceof HttpError) {
+      return res
+        .status(error.code)
+        .json(generateHttpResponse(error.code, error.msg));
+    }
+    return res
+      .status(500)
+      .json(generateHttpResponse(500, "Unkown Error", error));
+  }
+});
+
+checkRouter.delete("/", async (req, res) => {
+  try {
+    if (!req.body.name) {
+      return res
+        .status(400)
+        .json(generateHttpResponse(400, "Check name is missing"));
+    }
+    await deleteCheck(req.body.name);
+    return res.json(
+      generateHttpResponse(200, `Check '${req.body.name}' deleted`)
+    );
+  } catch (error) {
+    if (error instanceof HttpError) {
+      return res
+        .status(error.code)
+        .json(generateHttpResponse(error.code, error.msg));
     }
     return res
       .status(500)

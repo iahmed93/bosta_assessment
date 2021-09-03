@@ -8,17 +8,15 @@ import { CheckModel, CheckStatus, ICheck } from "../models/check.model";
 import { HttpError } from "../models/http-error.model";
 import axios, { AxiosRequestConfig, Method } from "axios";
 import { Agent } from "https";
-import { MailOptions, sendEmail } from "./email.service";
-import { UserModel } from "../models/user.model";
 import PromiseSocket from "promise-socket";
 import { Socket } from "net";
-
-// TODO: Test Pause
-// TODO: Test Delete
-// TODO: Test Activate
+import { Alert } from "./alert.service";
+import { EmailAlert } from "./email-alert.service";
+import { WebhookAlert } from "./webhook-alert.service";
 
 const activeChecks: { [key: string]: NodeJS.Timer } = {};
 const lastCheckResult: { [key: string]: ICheckResult } = {};
+const alerts: Alert[] = [new EmailAlert(), new WebhookAlert()];
 
 export async function addCheck(check: ICheck) {
   // check for required properties
@@ -66,7 +64,7 @@ async function checkUrl(check: ICheck) {
       lastCheckResult[check.name] &&
       lastCheckResult[check.name].status !== result.status
     ) {
-      sendStatusEmail(check, result.status);
+      sendStatusAlert(check, result);
     }
     lastCheckResult[check.name] = result;
     saveCheckResult(result);
@@ -108,13 +106,6 @@ async function sendHttpRequest(check: ICheck): Promise<ICheckResult> {
       timestamp: startTime,
       elapsedTime: Date.now() - startTime,
       status: "up",
-      // request: result.request,
-      // response: {
-      //   statusCode: result.status,
-      //   statusText: result.statusText,
-      //   headers: result.headers,
-      //   data: result.data,
-      // },
     };
   } catch (error: any) {
     console.error(error);
@@ -123,22 +114,15 @@ async function sendHttpRequest(check: ICheck): Promise<ICheckResult> {
       timestamp: startTime,
       elapsedTime: Date.now() - startTime,
       status: "down",
-      // request: error.request ? error.request : null,
-      // response: error.response ? error.response : error.message,
     };
   }
   return checkResult;
 }
 
-async function sendStatusEmail(check: ICheck, status: UrlStatus) {
-  const user = await UserModel.findById(check.userId);
-  const mailOptions: MailOptions = {
-    to: user!.email,
-    from: "no-reply@test.com",
-    subject: "Check Status",
-    text: `Check "${check.name}" is ${status}`,
-  };
-  sendEmail(mailOptions);
+async function sendStatusAlert(check: ICheck, result: ICheckResult) {
+  for (let alert of alerts) {
+    alert.send(check, result);
+  }
 }
 
 async function sendTcpRequest(check: ICheck): Promise<ICheckResult> {
@@ -193,6 +177,9 @@ export async function pauseCheck(name: string) {
   try {
     const check = await CheckModel.findOne({ name });
     if (check) {
+      if (check.status == "paused") {
+        return;
+      }
       clearInterval(activeChecks[check.name]);
       check.status = "pasued" as CheckStatus;
       await check.save();
@@ -209,6 +196,9 @@ export async function activateCheck(name: string) {
   try {
     const check = await CheckModel.findOne({ name });
     if (check) {
+      if (check.status == "active") {
+        return;
+      }
       startCheck(check);
       check.status = "active" as CheckStatus;
       await check.save();
@@ -236,15 +226,6 @@ function checkRequiredFields(check: ICheck) {
   }
 }
 
-// const check: ICheck = {
-//   url: "google.com",
-//   ignoreSSL: true,
-//   name: "test",
-//   protocol: "http",
-//   interval: 10,
-// };
-// startCheck(check);
-
 export async function startActiveChecks() {
   try {
     const activeChecks = await CheckModel.find({ status: "active" });
@@ -260,3 +241,7 @@ export async function startActiveChecks() {
     console.log(error);
   }
 }
+
+export async function editCheck() {}
+
+export async function sendAllert(check: ICheck, checkResult: ICheckResult) {}

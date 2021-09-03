@@ -1,5 +1,3 @@
-export class HttpError extends Error {
-  constructor(public code: number, msg: string) {
-    super(msg);
-  }
+export class HttpError {
+  constructor(public code: number, public msg: string, public error?: Error) {}
 }

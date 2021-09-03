@@ -24,7 +24,7 @@ userRouter.put("/signup", async (req, res) => {
     if (error instanceof HttpError) {
       return res
         .status(error.code)
-        .json(generateHttpResponse(error.code, "error.message", error));
+        .json(generateHttpResponse(error.code, error.msg, error));
     }
     return res
       .status(500)
@@ -43,7 +43,7 @@ userRouter.post("/signin", async (req, res) => {
     if (error instanceof HttpError) {
       return res
         .status(error.code)
-        .json(generateHttpResponse(error.code, "error.message", error));
+        .json(generateHttpResponse(error.code, error.msg, error));
     }
     return res
       .status(500)
@@ -57,10 +57,10 @@ userRouter.post("/verify", async (req, res) => {
     return res.status(200).json(generateHttpResponse(200, "Email Verified"));
   } catch (error: HttpError | any) {
     console.error("/verify ERROR", { error });
-    if (error instanceof HttpError || error.code === 400) {
+    if (error instanceof HttpError) {
       return res
         .status(error.code)
-        .json(generateHttpResponse(error.code, error.message, error));
+        .json(generateHttpResponse(error.code, error.msg, error));
     }
     return res
       .status(500)
