@@ -1,5 +1,5 @@
 import { MongoServerError } from "mongodb";
-import {CheckResultModel, ICheckResult} from "../models/check-result.model";
+import { CheckResultModel, ICheckResult } from "../models/check-result.model";
 import { CheckModel, CheckStatus, ICheck } from "../models/check.model";
 import { HttpError } from "../models/http-error.model";
 import axios, { AxiosRequestConfig, Method } from "axios";
@@ -9,11 +9,12 @@ import { Socket } from "net";
 import { Alert } from "./alert.service";
 import { EmailAlert } from "./email-alert.service";
 import { WebhookAlert } from "./webhook-alert.service";
-import { ICheckReport } from "../models/check-report.model";
+import { CheckReportModel, ICheckReport } from "../models/check-report.model";
 
 // TODO: Test Alerts and Webhooks
 // TODO: Test all input of the add check
 // TODO: Test the edit
+// TODO: Test the reports
 
 const activeChecks: { [key: string]: NodeJS.Timer } = {};
 const prevCheckResult: { [key: string]: ICheckResult } = {};
@@ -22,10 +23,16 @@ const alerts: Alert[] = [new EmailAlert(), new WebhookAlert()];
 export async function addCheck(check: ICheck) {
   // check for required properties
   checkRequiredFields(check);
-  // check if the name and userid found 
-  const oldCheck = await CheckModel.findOne({ name: check.name, userId: check.userId });
-  if (oldCheck){
-    throw new HttpError(400, `Check with name "${check.name}" is already exist`);
+  // check if the name and userid found
+  const oldCheck = await CheckModel.findOne({
+    name: check.name,
+    userId: check.userId,
+  });
+  if (oldCheck) {
+    throw new HttpError(
+      400,
+      `Check with name "${check.name}" is already exist`
+    );
   }
   // save check
   let doc = null;
@@ -251,7 +258,10 @@ export async function startActiveChecks() {
 
 export async function editCheck(check: ICheck) {
   // get the check from the database
-  const oldCheck = await CheckModel.findOne({ name: check.name, userId: check.userId });
+  const oldCheck = await CheckModel.findOne({
+    name: check.name,
+    userId: check.userId,
+  });
   if (!oldCheck) {
     throw new HttpError(400, `Check with name ${name} is not found`);
   }
@@ -263,20 +273,81 @@ export async function editCheck(check: ICheck) {
   await activateCheck(check.name);
 }
 
-async function updateCheckReport (check: ICheck, result: ICheckResult){
+async function updateCheckReport(check: ICheck, result: ICheckResult) {
   // get the report from the DB
+  let report = await CheckReportModel.findOne({ checkId: check._id });
   // if not found crate new one
-  // increment the checksCount
-  // if down => increment the outages
-  // if down and prev check was down => add the interval time to the downtime
-  // if up and prev check was up => add the interval time to the uptime
-  // if up => add the result reponse time to the totalResponseTime then calculate average response time
-  // add check result to history
+  if (!report) {
+    let newReport: ICheckReport = {
+      checksCount: 1,
+      outages: result.status == "down" ? 1 : 0,
+      downtime:
+        result.status == "down" && prevCheckResult[check.name].status == "down"
+          ? check.interval!
+          : 0,
+      uptime:
+        result.status == "up" && prevCheckResult[check.name].status == "up"
+          ? check.interval!
+          : 0,
+      totalResponseTime: result.status == "up" ? result.elapsedTime : 0,
+      history: [result],
+      availability: 0,
+      checkId: check._id!,
+      responseTime: 0,
+      status: result.status,
+      checkName: check.name,
+    };
+    newReport.availability =
+      ((newReport.checksCount - newReport.outages) / newReport.checksCount) *
+      100;
+    newReport.responseTime =
+      (newReport.totalResponseTime / newReport.checksCount) * 100;
+    report = new CheckReportModel(newReport);
+  } else {
+    report.status = result.status;
+    // increment the checksCount
+    report.checksCount++;
+    // if down => increment the outages
+    report.outages =
+      result.status == "down" ? report.outages++ : report.outages;
+    // if down and prev check was down => add the interval time to the downtime
+    report.downtime =
+      result.status == "down" && report.status == "down"
+        ? report.downtime + check.interval!
+        : report.downtime;
+    // if up and prev check was up => add the interval time to the uptime
+    report.uptime =
+      result.status == "up" && report.status == "up"
+        ? report.uptime + check.interval!
+        : report.downtime;
+    // if up => add the result reponse time to the totalResponseTime then calculate average response time
+    report.totalResponseTime =
+      result.status == "up"
+        ? report.totalResponseTime + result.elapsedTime
+        : report.totalResponseTime;
+    report.responseTime = (report.totalResponseTime / report.checksCount) * 100;
+    report.availability =
+      ((report.checksCount - report.outages) / report.checksCount) * 100;
+    // add check result to history
+    report.history.push(result);
+  }
+  report.save();
 }
 
-export async function getCheckReportByUserId (userId: string, tags: string[]) // : ICheckReport
-{
+export async function getCheckReportByUserId(
+  userId: string,
+  tags: string[]
+): Promise<ICheckReport[]> {
   // get all checks by userId
+  const checks = await CheckModel.find({ userId });
+  if (checks.length === 0) {
+    return [];
+  }
   // get all check reports using the list of checksIds
+  const checkIds: string[] = checks.map((check) => check._id);
+  const checkReports = await CheckReportModel.find({
+    $and: [{ checkId: { $in: checkIds } }, { tags: { $in: tags } }],
+  });
   // add the name of the check to each doc of the reports
+  return checkReports.length === 0 ? checkReports : [];
 }

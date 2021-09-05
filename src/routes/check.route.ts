@@ -6,6 +6,7 @@ import {
   addCheck,
   deleteCheck,
   editCheck,
+  getCheckReportByUserId,
   pauseCheck,
 } from "../services/check.service";
 import { generateHttpResponse } from "../utils/utils";
@@ -98,6 +99,30 @@ checkRouter.delete("/", async (req, res) => {
         .json(generateHttpResponse(400, "Check name is missing"));
     }
     await deleteCheck(req.body.name);
+    return res.json(
+      generateHttpResponse(200, `Check '${req.body.name}' deleted`)
+    );
+  } catch (error) {
+    if (error instanceof HttpError) {
+      return res
+        .status(error.code)
+        .json(generateHttpResponse(error.code, error.msg));
+    }
+    return res
+      .status(500)
+      .json(generateHttpResponse(500, "Unkown Error", error));
+  }
+});
+
+checkRouter.get("/report/:userId", async (req, res) => {
+  // ?tags=test,test123
+  let tags: string[] = [];
+  if (req.query.tags) {
+    const queryTags = req.query.tags as string;
+    tags = queryTags.split(",");
+  }
+  try {
+    await getCheckReportByUserId(req.params.userId, tags);
     return res.json(
       generateHttpResponse(200, `Check '${req.body.name}' deleted`)
     );
