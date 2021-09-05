@@ -80,7 +80,7 @@ async function checkUrl(check: ICheck) {
       sendStatusAlert(check, result);
     }
     prevCheckResult[check.name] = result;
-    saveCheckResult(result);
+    // saveCheckResult(result);
     updateCheckReport(check, result);
   }
 }
