@@ -27,6 +27,7 @@ const schema = new Schema<ICheckReport>({
   checkId: { type: String, required: true },
   checksCount: { type: Number, required: true },
   totalResponseTime: { type: Number, required: true },
+  checkName: { type: String },
 });
 
 const CheckReportModel = model<ICheckReport>("CheckReport", schema);

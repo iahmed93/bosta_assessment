@@ -17,12 +17,7 @@ export function generateVerificationCode(length: number): string {
 }
 
 export function hashedText(password: string, saltRounds: number): string {
-  try {
-    return hashSync(password, saltRounds);
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to hash password");
-  }
+  return hashSync(password, saltRounds);
 }
 
 export function compareHash(plainText: string, hashedText: string): boolean {

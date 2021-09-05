@@ -25,7 +25,7 @@ interface ICheck {
 }
 
 const schema = new Schema<ICheck>({
-  name: { type: String, required: true},
+  name: { type: String, required: true },
   url: { type: String, required: true },
   protocol: { type: String, require: true },
   path: { type: String },
@@ -46,4 +46,4 @@ const schema = new Schema<ICheck>({
 
 const CheckModel = model<ICheck>("Check", schema);
 
-export { CheckModel, ICheck, CheckStatus };
+export { CheckModel, ICheck, CheckStatus, Protocol };

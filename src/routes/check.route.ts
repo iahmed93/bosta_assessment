@@ -114,18 +114,16 @@ checkRouter.delete("/", async (req, res) => {
   }
 });
 
-checkRouter.get("/report/:userId", async (req, res) => {
+checkRouter.get("/report", async (req, res) => {
   // ?tags=test,test123
   let tags: string[] = [];
   if (req.query.tags) {
-    const queryTags = req.query.tags as string;
+    const queryTags = req.query.tag as string;
     tags = queryTags.split(",");
   }
   try {
-    await getCheckReportByUserId(req.params.userId, tags);
-    return res.json(
-      generateHttpResponse(200, `Check '${req.body.name}' deleted`)
-    );
+    const report = await getCheckReportByUserId(req.body.userId, tags);
+    return res.json(generateHttpResponse(200, `Success`, report));
   } catch (error) {
     if (error instanceof HttpError) {
       return res

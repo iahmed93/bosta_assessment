@@ -8,11 +8,14 @@
 		{
 			"name": "Sign Up",
 			"request": {
+				"auth": {
+					"type": "noauth"
+				},
 				"method": "PUT",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"islam93ahmed@gmail.com\",\r\n    \"password\":\"test\" \r\n}",
+					"raw": "{\r\n    \"email\": \"islam.ahme\",\r\n    \"password\":\"test\" \r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -36,6 +39,9 @@
 		{
 			"name": "Verify Email",
 			"request": {
+				"auth": {
+					"type": "noauth"
+				},
 				"method": "POST",
 				"header": [],
 				"body": {
@@ -77,6 +83,9 @@
 				}
 			],
 			"request": {
+				"auth": {
+					"type": "noauth"
+				},
 				"method": "POST",
 				"header": [],
 				"body": {
@@ -105,21 +114,11 @@
 		{
 			"name": "Add Check",
 			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "string"
-						}
-					]
-				},
 				"method": "PUT",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"name\": \"t2\",\r\n    \"url\": \"localhost\",\r\n    \"port\": 8080,\r\n    \"protocol\":\"http\",\r\n    \"ignoreSSL\": false\r\n}",
+					"raw": "{\r\n    \"name\": \"t2\",\r\n    \"url\": \"localhost\",\r\n    \"port\": 3000,\r\n    \"protocol\":\"http\",\r\n    \"ignoreSSL\": false,\r\n    \"webhook\":\"https://discord.com/api/webhooks/883278451811962881/XrhJ6FKnIh-22vrhGwITYt-jGZLVgUwZEAsK_QWveim-bdJhK4XcmisIvKih7okN97p9\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -174,8 +173,110 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Pause Check",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\":\"t2\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/check/pause",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"check",
+						"pause"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Activate Check",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\":\"t2\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/check/activate",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"check",
+						"activate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Check",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\":\"t2\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/check",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"check"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Report",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": null
+			},
+			"response": []
 		}
 	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
 	"event": [
 		{
 			"listen": "prerequest",
