@@ -10,6 +10,7 @@ import { Alert } from "./alert.service";
 import { EmailAlert } from "./email-alert.service";
 import { WebhookAlert } from "./webhook-alert.service";
 import { CheckReportModel, ICheckReport } from "../models/check-report.model";
+import { ObjectId } from "mongoose";
 
 // TODO: Test Alerts and Webhooks
 // TODO: Test all input of the add check
@@ -164,15 +165,6 @@ async function sendTcpRequest(check: ICheck): Promise<ICheckResult> {
   }
 }
 
-async function saveCheckResult(checkResult: ICheckResult) {
-  try {
-    const doc = new CheckResultModel(checkResult);
-    await doc.save();
-  } catch (error) {
-    console.error(error);
-  }
-}
-
 export async function deleteCheck(name: string) {
   try {
     const check = await CheckModel.findOne({ name });
@@ -225,7 +217,7 @@ export async function activateCheck(name: string) {
   }
 }
 
-function checkRequiredFields(check: ICheck) {
+export function checkRequiredFields(check: ICheck) {
   if (!check.name) {
     throw new HttpError(400, "Missing Check name");
   }
@@ -323,9 +315,9 @@ async function updateCheckReport(check: ICheck, result: ICheckResult) {
     // if up => add the result reponse time to the totalResponseTime then calculate average response time
     report.totalResponseTime =
       result.status == "up"
-        ? report.totalResponseTime + result.elapsedTime
+        ? report.totalResponseTime + result.elapsedTime / 1000
         : report.totalResponseTime;
-    report.responseTime = (report.totalResponseTime / report.checksCount) * 100;
+    report.responseTime = report.totalResponseTime / report.checksCount;
     report.availability =
       ((report.checksCount - report.outages) / report.checksCount) * 100;
     // add check result to history
@@ -339,15 +331,19 @@ export async function getCheckReportByUserId(
   tags: string[]
 ): Promise<ICheckReport[]> {
   // get all checks by userId
-  const checks = await CheckModel.find({ userId });
+  const checks = await CheckModel.find({
+    $and: [{ userId }],
+  });
   if (checks.length === 0) {
     return [];
   }
   // get all check reports using the list of checksIds
-  const checkIds: string[] = checks.map((check) => check._id);
+  const checkIds: string[] = checks.map((check) =>
+    (check._id as ObjectId).toString()
+  );
   const checkReports = await CheckReportModel.find({
-    $and: [{ checkId: { $in: checkIds } }, { tags: { $in: tags } }],
+    checkId: { $in: checkIds },
   });
   // add the name of the check to each doc of the reports
-  return checkReports.length === 0 ? checkReports : [];
+  return checkReports.length > 0 ? checkReports : [];
 }
