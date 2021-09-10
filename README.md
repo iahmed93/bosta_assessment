@@ -1,4 +1,4 @@
-# bosta_assessment
+# URL Checker
 
 ### create .evn file and add the following to it
 
