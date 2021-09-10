@@ -1,4 +1,4 @@
-# URL Checker
+# Uptime Checker 
 
 ### create .evn file and add the following to it
 
