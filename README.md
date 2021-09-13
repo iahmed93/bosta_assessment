@@ -1,4 +1,4 @@
-# Uptime Checker 
+# Uptime tracker 
 
 ### create .evn file and add the following to it
 
