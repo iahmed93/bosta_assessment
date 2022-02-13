@@ -48,9 +48,7 @@ checkRouter.post("/", async (req, res) => {
 checkRouter.post("/pause", async (req, res) => {
   try {
     if (!req.body.name) {
-      return res
-        .status(400)
-        .json(generateHttpResponse(400, "Check name is missing"));
+      return res.status(400).json(generateHttpResponse(400, "Name is missing"));
     }
     await pauseCheck(req.body.name);
     return res.json(
