@@ -69,9 +69,7 @@ checkRouter.post("/pause", async (req, res) => {
 checkRouter.post("/activate", async (req, res) => {
   try {
     if (!req.body.name) {
-      return res
-        .status(400)
-        .json(generateHttpResponse(400, "Check name is missing"));
+      return res.status(400).json(generateHttpResponse(400, "Name is missing"));
     }
     await activateCheck(req.body.name);
     return res.json(
