@@ -62,7 +62,7 @@ async function checkUrl(check: ICheck) {
   let result: ICheckResult | null = null;
   let triesCount = 0;
   while (
-    (result == null || result.status! === "down") &&
+    (result === null || result.status! === "down") &&
     triesCount < check.threshold!
   ) {
     if (check.protocol == "http" || check.protocol == "https") {
